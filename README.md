@@ -248,7 +248,7 @@ A tela também tem os botões:
 
 # Testes
 
-Os casos de teste, a massa de dados e as evidências estão em [`TEST_QA.md`](TEST_QA.md).
+Os casos de teste, a massa de dados e as evidências estão em [`README-TEST.md`](README-TEST.md).
 
 ---
 
