@@ -22,7 +22,7 @@ Os testes foram feitos direto no app (Windows Forms), usando a pasta `C:\XmlNfce
 
 # 2. Massa de Dados
 
-Todos os XMLs usados estão na pasta [`massa-de-dados/`](massa-de-dados) do repositório.
+Todos os XMLs usados de teste estão no arquivo [`XmlNfce.zip/`](XmlNfce.zip) no repositório, baixe ele e extraia em `C:\XmlNfce` no seu computador.
 
 ## XML válido (CT02 e CT03)
 
