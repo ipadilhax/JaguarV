@@ -88,6 +88,16 @@ namespace JaguarV.Services
             if (chaveXml != chaveNomeArquivo)
                 return null;
 
+            XElement? infProt = doc.Descendants(ns + "infProt").FirstOrDefault();
+
+            if (infProt == null)
+                return null;
+
+            string? cStat = infProt.Element(ns + "cStat")?.Value.Trim();
+
+            if (cStat != "100")
+                return null;
+
             string? modelo = ide.Element(ns + "mod")?.Value.Trim();
 
             if (modelo != "65")
