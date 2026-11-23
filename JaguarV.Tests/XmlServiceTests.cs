@@ -45,7 +45,7 @@ namespace JaguarV.Tests
             Assert.Contains("não foi encontrada", ex.Message);
         }
 
-        [Fact(DisplayName = "TA05 - Nota válida gera o arquivo MMAAAA + 5 dígitos do CNPJ com chave e competência")]
+        [Fact(DisplayName = "TA05 - Nota válida gera o arquivo MMAAAA + 5 dígitos do CNPJ com chave, modelo e competência")]
         public void TA05_NotaValida_GeraArquivo()
         {
             string chave = NfceTeste.Chave();
@@ -59,7 +59,11 @@ namespace JaguarV.Tests
 
             var nota = Assert.Single(LerNotas(caminho));
             Assert.Equal(chave, nota.GetProperty("chave").GetString());
+            Assert.Equal("65", nota.GetProperty("modelo").GetString());
             Assert.Equal("09/2026", nota.GetProperty("competencia").GetString());
+
+            // O JSON final tem só os três campos pedidos nas diretrizes
+            Assert.Equal(3, nota.EnumerateObject().Count());
         }
 
         [Fact(DisplayName = "TA06 - Arquivo sem chave de 44 dígitos no nome é ignorado")]
@@ -152,6 +156,30 @@ namespace JaguarV.Tests
             Assert.Equal(0, validas);
             Assert.Equal(Path.Combine(_pasta, "09202600000.txt"), caminho);
             Assert.Empty(LerNotas(caminho));
+        }
+
+        [Fact(DisplayName = "TA14 - Nota não autorizada (cStat diferente de 100) é descartada")]
+        public void TA14_CStatDiferenteDe100_Descartada()
+        {
+            string chave = NfceTeste.Chave();
+            CriarXml($"{chave}-procNFe.xml", NfceTeste.Xml(chave, cStat: "101"));
+
+            var (total, validas, _) = _service.VerificarXMLs(_pasta, Competencia);
+
+            Assert.Equal(1, total);
+            Assert.Equal(0, validas);
+        }
+
+        [Fact(DisplayName = "TA15 - XML sem protocolo de autorização (sem cStat) é descartado")]
+        public void TA15_SemProtocolo_Descartada()
+        {
+            string chave = NfceTeste.Chave();
+            CriarXml($"{chave}-procNFe.xml", NfceTeste.Xml(chave, cStat: null));
+
+            var (total, validas, _) = _service.VerificarXMLs(_pasta, Competencia);
+
+            Assert.Equal(1, total);
+            Assert.Equal(0, validas);
         }
     }
 }

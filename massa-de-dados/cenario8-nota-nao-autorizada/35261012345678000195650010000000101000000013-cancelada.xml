@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<nfeProc xmlns="http://www.portalfiscal.inf.br/nfe">
+  <NFe>
+    <infNFe Id="NFe35261012345678000195650010000000101000000013">
+      <ide>
+        <mod>65</mod>
+        <serie>1</serie>
+        <dhEmi>2026-10-15T10:00:00-03:00</dhEmi>
+      </ide>
+      <dest></dest>
+      <total>
+        <ICMSTot>
+          <vNF>150.00</vNF>
+        </ICMSTot>
+      </total>
+    </infNFe>
+  </NFe>
+  <protNFe>
+    <infProt>
+      <chNFe>35261012345678000195650010000000101000000013</chNFe>
+      <cStat>101</cStat>
+      <xMotivo>Cancelamento de NF-e homologado</xMotivo>
+    </infProt>
+  </protNFe>
+</nfeProc>

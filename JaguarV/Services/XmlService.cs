@@ -125,6 +125,7 @@ namespace JaguarV.Services
             return new NotaEnvio
             {
                 Chave = chaveXml,
+                Modelo = modelo,
                 Competencia = data.ToString("MM/yyyy")
             };
         }

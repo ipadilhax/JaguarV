@@ -15,4 +15,11 @@
       </total>
     </infNFe>
   </NFe>
+  <protNFe>
+    <infProt>
+      <chNFe>35261012345678000195650010000000011000000014</chNFe>
+      <cStat>100</cStat>
+      <xMotivo>Autorizado o uso da NF-e</xMotivo>
+    </infProt>
+  </protNFe>
 </nfeProc>

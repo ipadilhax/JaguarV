@@ -24,13 +24,13 @@ A empresa emite todo dia centenas de **NFC-e (modelo 65)**, e os XMLs ficam guar
 
 Fazer isso na mão é demorado e fácil de errar. O **JaguarV** automatiza o processo: o usuário escolhe a competência (mês/ano), o app lê os XMLs da pasta `C:\XmlNfce`, aplica os filtros e gera um arquivo com as notas aprovadas.
 
-O JaguarV é a nova versão do nosso projeto anterior, o **XMLAppReader**. A comparação entre os dois está no final deste documento.
+O JaguarV é a nova versão do nosso projeto anterior, o **XMLAppReader**. A comparação entre os dois está no final deste documento, junto com a [última atualização](#última-atualização) do projeto.
 
 ---
 
 # Visão geral do fluxo
 
-O processamento começa no botão **BUSCAR** (`btnBuscar`) do `FormPrincipal`:
+O processamento começa no botão **Buscar notas** (`btnBuscar`) do `FormPrincipal`:
 
 1. O usuário escolhe a competência no `DateTimePicker` (formato `MM/yyyy`);
 2. O app converte a competência para `yyyy-MM`;
@@ -47,10 +47,12 @@ O código está dividido em camadas:
 
 | Arquivo                          | Função                                                              |
 | -------------------------------- | ------------------------------------------------------------------- |
-| `Form1.cs` (`FormPrincipal`)     | Tela: competência, botões e mensagens para o usuário                |
+| `Form1.cs` (`FormPrincipal`)     | Tela: competência, botões, troca de tema e layout responsivo        |
+| `UI/Tema.cs`                     | Cores dos temas claro e escuro                                      |
+| `UI/Controles.cs`                | Controles visuais próprios: botão arredondado e passo numerado      |
 | `Services/XmlService.cs`         | Lê os XMLs, aplica os filtros e gera o arquivo de saída             |
 | `Services/ChaveAcessoService.cs` | Valida a chave de acesso e extrai informações dela (CNPJ, série)    |
-| `Models/NotaEnvio.cs`            | Modelo da nota aprovada (`Chave` e `Competencia`)                   |
+| `Models/NotaEnvio.cs`            | Modelo da nota aprovada (`Chave`, `Modelo` e `Competencia`)         |
 
 ---
 
@@ -107,11 +109,24 @@ Os elementos `infNFe` e `ide` precisam existir.
 
 O atributo `Id` do `infNFe` precisa existir. Tirando o prefixo `NFe`, ele deve ter **44 caracteres** e ser **igual à chave do nome do arquivo**.
 
-## 3. Modelo
+## 3. Nota autorizada (cStat = 100)
+
+O app procura o protocolo de autorização da SEFAZ (`<protNFe>` → `<infProt>`) e lê a tag `<cStat>`. A nota só segue se o `cStat` for **`100`** (Autorizado o uso da NF-e). Uma nota cancelada (`101`), denegada ou sem protocolo é descartada.
+
+```xml
+<protNFe>
+  <infProt>
+    <chNFe>35261012345678000195650010000000011000000014</chNFe>
+    <cStat>100</cStat>
+  </infProt>
+</protNFe>
+```
+
+## 4. Modelo
 
 A tag `<mod>` precisa ser `65`, confirmando o que a chave já dizia.
 
-## 4. Data de emissão
+## 5. Data de emissão
 
 O `<dhEmi>` precisa existir e é convertido com:
 
@@ -121,7 +136,7 @@ DateTimeOffset.TryParse
 
 O ano e o mês (`yyyy-MM`) precisam bater com a competência escolhida. Com o `DateTimeOffset`, a data é lida como data de verdade, em vez de cortar o texto com `Substring` como na versão anterior.
 
-## 5. Sem identificação do destinatário
+## 6. Sem identificação do destinatário
 
 A nota só é aprovada se **não tiver CPF nem CNPJ** em `<dest>`, ou seja, só notas de consumidor não identificado. Essa é a última verificação.
 
@@ -129,12 +144,15 @@ A nota só é aprovada se **não tiver CPF nem CNPJ** em `<dest>`, ou seja, só 
 
 # Resultado do processamento
 
-As notas que passam em todos os filtros viram objetos `NotaEnvio`, com só dois campos:
+As notas que passam em todos os filtros viram objetos `NotaEnvio`, com só os três campos pedidos nas diretrizes:
 
-| Campo         | Descrição                      |
-| ------------- | ------------------------------ |
-| `Chave`       | Chave de acesso da NFC-e       |
-| `Competencia` | Mês e ano da emissão           |
+| Campo         | Descrição                                          |
+| ------------- | -------------------------------------------------- |
+| `Chave`       | Chave de acesso da NFC-e (44 dígitos)              |
+| `Modelo`      | Modelo do documento: sempre `65` (NFC-e)           |
+| `Competencia` | Mês e ano da emissão, no formato `MM/AAAA`         |
+
+> As diretrizes chamam esse campo de "Série 65". Na NFC-e, o **65 é o modelo** do documento (posições 21–22 da chave). A **série** é outro campo (posições 23–25, ex.: `001`). Por isso o campo no JSON se chama `modelo`.
 
 Internamente, a competência é tratada como `yyyy-MM` (ex.: `2026-10`) para as comparações. No arquivo final ela é gravada como `MM/yyyy` (ex.: `10/2026`).
 
@@ -165,6 +183,7 @@ Exemplo: `10202612345.txt`
 [
   {
     "chave": "35261012345678000195650010000000011000000014",
+    "modelo": "65",
     "competencia": "10/2026"
   }
 ]
@@ -184,15 +203,43 @@ Process.Start
 | -------------------------------------- | -------------------------------------------------------------------------------- |
 | Pasta `C:\XmlNfce` não existe          | O `XmlService` lança `DirectoryNotFoundException` e a tela mostra um aviso       |
 | Arquivo sem chave de 44 dígitos no nome | É descartado na etapa 1, sem aviso                                              |
+| Nota sem `cStat` 100 (cancelada, denegada ou sem protocolo) | É descartada na etapa 2, sem aviso                        |
 | XML inválido ou corrompido             | O erro é capturado e só aquele arquivo é ignorado                                |
 | Qualquer outro erro                    | Aparece num `MessageBox` de erro                                                 |
 | Processamento concluído                | Mostra quantos XMLs foram encontrados e quantas notas são válidas, e abre o `.txt` |
 
 A tela também tem os botões:
 
-* **AJUDA:** explica a pasta dos XMLs e quais notas são válidas;
-* **CRÉDITOS:** mostra o projeto e os integrantes;
-* **SAIR:** pede confirmação antes de fechar.
+* **Ajuda:** explica a pasta dos XMLs e quais notas são válidas;
+* **Créditos:** mostra o projeto e os integrantes;
+* **Sair:** pede confirmação antes de fechar;
+* **Tema escuro / Tema claro:** troca as cores da tela.
+
+Ao maximizar a janela, a tela passa para duas colunas: logo e passo a passo à esquerda, formulário à direita.
+
+---
+
+# Interface
+
+A tela foi redesenhada com fonte Segoe UI (nativa do Windows), botões preenchidos com cantos arredondados e dois temas. O botão principal é o **Buscar notas**; Ajuda, Créditos e Sair ficam numa linha abaixo, mais discretos.
+
+| Tema claro | Tema escuro |
+| :---: | :---: |
+| ![Tema claro](evidencias/interface-tema-claro.png) | ![Tema escuro](evidencias/cenario9-tema-escuro.png) |
+
+Com a janela maximizada, a tela se divide em duas colunas:
+
+![Tela cheia](evidencias/cenario10-tela-cheia.png)
+
+Como foi feito (tudo com Windows Forms, sem bibliotecas externas):
+
+| Recurso | Como funciona |
+| ------- | ------------- |
+| Cores dos temas | Ficam todas na classe `Tema` (`UI/Tema.cs`), com as paletas `Claro` e `Noturno`. Trocar o tema é aplicar a outra paleta nos controles. |
+| Botões arredondados | Controle próprio `BotaoArredondado` (`UI/Controles.cs`), que herda de `Button` e desenha o fundo com `GraphicsPath`. Muda de cor ao passar o mouse. |
+| Passo a passo numerado | Controle próprio `EtapaNumerada`, que desenha o círculo com o número e o texto. |
+| Tela cheia | Um `TableLayoutPanel` com duas colunas. Acima de 900 px de largura, a coluna do logo aparece (44% / 56%); abaixo disso, some. |
+| Barra de título escura | Chamada `DwmSetWindowAttribute` da API do Windows (Windows 10 20H1+ e Windows 11). |
 
 ---
 
@@ -212,12 +259,14 @@ A tela também tem os botões:
 | Validação da competência        | `Substring(0, 7)` no texto do `dhEmi`               | AAMM da chave + `DateTimeOffset` no `dhEmi`                   |
 | Validação da série              | Comparava com a série digitada                      | Não filtra mais por série                                     |
 | Valor da nota (`vNF`)           | Ia para o JSON                                      | Não é mais usado                                              |
+| Autorização da SEFAZ (`cStat`)  | Não validava                                        | Só aceita `cStat` = 100                                       |
+| Campos do JSON                  | Chave, competência e valor                          | Chave, modelo (65) e competência (`MM/AAAA`)                  |
 | Arquivo gerado                  | `envio.json`                                        | `MMAAAA` + 5 dígitos do CNPJ + `.txt` (conteúdo em JSON)      |
 | Formato da competência na saída | `yyyy-MM`                                           | `MM/yyyy`                                                     |
 | Sem notas válidas               | `envio.json` com `[]`                               | `MMAAAA00000.txt` com `[]`                                    |
 | Pasta inexistente               | Aviso dentro do método de leitura                   | Exceção tratada pela tela, que mostra o aviso                 |
-| Tela                            | Série, data e botão Buscar                          | Logo, competência, BUSCAR, AJUDA, CRÉDITOS e SAIR             |
-| Testes                          | Só manuais                                          | Manuais + 13 automatizados (xUnit)                            |
+| Tela                            | Série, data e botão Buscar                          | Logo, competência, Buscar notas, Ajuda, Créditos e Sair, com tema claro/escuro e layout de tela cheia |
+| Testes                          | Só manuais                                          | Manuais + 15 automatizados (xUnit)                            |
 
 ## Exemplo de saída
 
@@ -239,10 +288,66 @@ A tela também tem os botões:
 [
   {
     "chave": "35261012345678000195650010000000011000000014",
+    "modelo": "65",
     "competencia": "10/2026"
   }
 ]
 ```
+
+---
+
+# Última atualização
+
+Na última etapa do projeto, fizemos três mudanças principais no JaguarV.
+
+## 1. Modelo 65 no JSON final
+
+As diretrizes pedem que o JSON tenha **apenas** a chave da NFC-e, o modelo/"série" 65 e o ano e mês no formato `MM/AAAA`. Antes, o arquivo só tinha a chave e a competência. Agora o `NotaEnvio` tem também o campo `Modelo`:
+
+**Antes:**
+
+```json
+{ "chave": "35261012345678000195650010000000011000000014", "competencia": "10/2026" }
+```
+
+**Depois:**
+
+```json
+{ "chave": "35261012345678000195650010000000011000000014", "modelo": "65", "competencia": "10/2026" }
+```
+
+O campo se chama `modelo` porque, na NFC-e, o 65 é o **modelo** do documento (posições 21–22 da chave). A **série** é outro campo da chave (posições 23–25).
+
+## 2. Verificação do cStat (nota autorizada pela SEFAZ)
+
+O `cStat` é o código de status que a SEFAZ devolve no protocolo da nota (`<protNFe>` → `<infProt>`). O valor **`100`** quer dizer "Autorizado o uso da NF-e". O JaguarV agora só aprova notas com `cStat` = 100; uma nota cancelada (`101`), denegada ou sem protocolo é descartada. A explicação completa está na [Etapa 2](#3-nota-autorizada-cstat--100).
+
+Junto com esse filtro:
+
+* Os XMLs da massa de dados ganharam o protocolo com `cStat` 100. Sem ele, o filtro descartava até a nota válida;
+* Foi criado o cenário **CT08** (`massa-de-dados/cenario8-nota-nao-autorizada`), com uma nota cancelada;
+* Foram criados os testes automatizados **TA14** (cStat diferente de 100) e **TA15** (XML sem protocolo);
+* A janela de **Ajuda** passou a explicar essa regra.
+
+## 3. Nova interface (UI/UX)
+
+A tela foi toda redesenhada para ficar mais moderna e fácil de usar:
+
+* Fonte **Segoe UI**, a fonte nativa do Windows, no lugar da fonte decorativa;
+* **Botões preenchidos** com cantos arredondados e mudança de cor ao passar o mouse;
+* Hierarquia clara: **Buscar notas** é o botão principal, e Ajuda, Créditos e Sair ficam numa linha abaixo;
+* Texto de apoio explicando o que fazer, rótulo no campo de competência e rodapé mostrando a pasta lida (`C:\XmlNfce`);
+* **Tema claro e tema escuro**, com um botão para trocar;
+* **Layout de tela cheia**: ao maximizar, a tela mostra o logo e o passo a passo à esquerda e o formulário à direita;
+* A tecla **Enter** aciona o Buscar notas.
+
+Os detalhes e os prints estão na seção [Interface](#interface).
+
+## Testes e evidências
+
+* Todos os prints de `evidencias/` foram refeitos com a tela nova;
+* Novos casos de teste: **CT08** (nota não autorizada), **CT09** (tema claro/escuro) e **CT10** (tela cheia);
+* Testes automatizados: **15 de 15 aprovados**.
 
 ---
 
@@ -259,6 +364,7 @@ Com o JaguarV, a conferência das NFC-e deixa de ser manual. O app lê a pasta, 
 Em relação à versão anterior, o processo ficou:
 
 * Mais rápido, porque descarta pelo nome do arquivo antes de abrir o XML;
-* Mais seguro, porque valida o modelo 65 e confere a chave do nome com a do XML;
+* Mais seguro, porque valida o modelo 65, confere a chave do nome com a do XML e só aceita notas autorizadas pela SEFAZ (`cStat` 100);
+* Mais completo, com o JSON trazendo exatamente o que as diretrizes pedem: chave, modelo 65 e competência `MM/AAAA`;
 * Mais organizado, com o código separado em camadas;
-* Mais fácil de usar, com ajuda e confirmação de saída na própria tela.
+* Mais fácil de usar, com uma interface moderna, tema claro/escuro, tela cheia, ajuda e confirmação de saída na própria tela.

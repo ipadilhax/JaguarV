@@ -6,17 +6,20 @@
 
 ## 1. Casos de Teste (CTs)
 
-Os testes foram feitos direto no app (Windows Forms), usando a pasta `C:\XmlNfce` e a competência **10/2026**.
+Os testes foram feitos direto no app (Windows Forms), já com a interface nova (tema claro/escuro e tela cheia), usando a pasta `C:\XmlNfce` e a competência **10/2026**.
 
 | ID       | Título                          | Pré-condição                                                                 | Passos / Entradas                                   | Resultado Esperado                                                                                   | Resultado Obtido                                                                                   |
 | -------- | ------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| **CT01** | Pasta inexistente               | A pasta `C:\XmlNfce` não existe.                                             | 1. Clicar em **BUSCAR**.                            | Mostrar um aviso dizendo que a pasta não foi encontrada.                                             | Aviso **"Pasta não encontrada: A pasta C:\XmlNfce não foi encontrada."**                           |
-| **CT02** | NFC-e válida                    | 1 XML válido em `C:\XmlNfce` (modelo 65, 10/2026, sem CPF/CNPJ).             | 1. Competência **10/2026**.<br>2. Clicar em **BUSCAR**. | Aprovar a nota, mostrar o resumo e gerar/abrir o `10202612345.txt`.                                  | **Arquivos XML encontrados: 1 / Notas válidas: 1**. Arquivo aberto no Bloco de Notas com a nota.   |
-| **CT03** | Lote com notas inválidas        | 9 XMLs em `C:\XmlNfce`: 1 válido e 8 com problemas (ver Massa de Dados).    | 1. Competência **10/2026**.<br>2. Clicar em **BUSCAR**. | Aprovar só a nota válida, descartar as outras e não travar com o XML corrompido.                     | **Arquivos XML encontrados: 9 / Notas válidas: 1**. Só a nota válida no `.txt`.                    |
-| **CT04** | Pasta vazia                     | A pasta `C:\XmlNfce` existe, mas está vazia.                                 | 1. Clicar em **BUSCAR**.                            | Gerar o arquivo `10202600000.txt` com a lista vazia.                                                 | **Arquivos XML encontrados: 0 / Notas válidas: 0**. Arquivo aberto com `[]`.                       |
-| **CT05** | Botão Ajuda                     | App aberto.                                                                  | 1. Clicar em **AJUDA**.                             | Mostrar como usar o app e quais notas são consideradas válidas.                                      | Janela **"Ajuda - JaguarV"** com o passo a passo e as regras.                                      |
-| **CT06** | Botão Créditos                  | App aberto.                                                                  | 1. Clicar em **CRÉDITOS**.                          | Mostrar o nome do projeto e dos integrantes.                                                         | Janela **"Créditos"** com os 5 integrantes.                                                        |
-| **CT07** | Botão Sair                      | App aberto.                                                                  | 1. Clicar em **SAIR**.                              | Pedir confirmação antes de fechar.                                                                   | Pergunta **"Deseja realmente sair do JaguarV?"** com Sim/Não.                                      |
+| **CT01** | Pasta inexistente               | A pasta `C:\XmlNfce` não existe.                                             | 1. Clicar em **Buscar notas**.                      | Mostrar um aviso dizendo que a pasta não foi encontrada.                                             | Aviso **"Pasta não encontrada: A pasta C:\XmlNfce não foi encontrada."**                           |
+| **CT02** | NFC-e válida                    | 1 XML válido em `C:\XmlNfce` (modelo 65, 10/2026, sem CPF/CNPJ).             | 1. Competência **10/2026**.<br>2. Clicar em **Buscar notas**. | Aprovar a nota, mostrar o resumo e gerar/abrir o `10202612345.txt`.                                  | **Arquivos XML encontrados: 1 / Notas válidas: 1**. Arquivo aberto no Bloco de Notas com a nota.   |
+| **CT03** | Lote com notas inválidas        | 9 XMLs em `C:\XmlNfce`: 1 válido e 8 com problemas (ver Massa de Dados).    | 1. Competência **10/2026**.<br>2. Clicar em **Buscar notas**. | Aprovar só a nota válida, descartar as outras e não travar com o XML corrompido.                     | **Arquivos XML encontrados: 9 / Notas válidas: 1**. Só a nota válida no `.txt`.                    |
+| **CT04** | Pasta vazia                     | A pasta `C:\XmlNfce` existe, mas está vazia.                                 | 1. Clicar em **Buscar notas**.                      | Gerar o arquivo `10202600000.txt` com a lista vazia.                                                 | **Arquivos XML encontrados: 0 / Notas válidas: 0**. Arquivo aberto com `[]`.                       |
+| **CT05** | Botão Ajuda                     | App aberto.                                                                  | 1. Clicar em **Ajuda**.                             | Mostrar como usar o app e quais notas são consideradas válidas.                                      | Janela **"Ajuda - JaguarV"** com o passo a passo e as regras.                                      |
+| **CT06** | Botão Créditos                  | App aberto.                                                                  | 1. Clicar em **Créditos**.                          | Mostrar o nome do projeto e dos integrantes.                                                         | Janela **"Créditos"** com os 5 integrantes.                                                        |
+| **CT07** | Botão Sair                      | App aberto.                                                                  | 1. Clicar em **Sair**.                              | Pedir confirmação antes de fechar.                                                                   | Pergunta **"Deseja realmente sair do JaguarV?"** com Sim/Não.                                      |
+| **CT08** | Nota não autorizada             | XML de NFC-e cancelada (`cStat` 101) em `C:\XmlNfce`.                     | 1. Competência **10/2026**.<br>2. Clicar em **Buscar notas**. | Descartar a nota e gerar o `10202600000.txt` com a lista vazia.                                      | **Arquivos XML encontrados: 1 / Notas válidas: 0**. Arquivo aberto com `[]`.                       |
+| **CT09** | Tema claro / escuro             | App aberto no tema claro.                                                    | 1. Clicar em **Tema escuro**.<br>2. Clicar em **Tema claro**. | Trocar as cores da tela e da barra de título, e voltar ao tema claro.                               | Tela azul-noite com o botão **Buscar notas** laranja; o botão passa a se chamar **Tema claro** e volta ao normal no segundo clique. |
+| **CT10** | Tela cheia                      | App aberto.                                                                  | 1. Maximizar a janela.                              | Mostrar a tela em duas colunas: logo e passo a passo à esquerda, formulário à direita.              | Layout em duas colunas, nos temas claro e escuro.                                                   |
 
 ---
 
@@ -46,6 +49,13 @@ Todos os XMLs usados estão na pasta [`massa-de-dados/`](massa-de-dados) do repo
       </total>
     </infNFe>
   </NFe>
+  <protNFe>
+    <infProt>
+      <chNFe>35261012345678000195650010000000011000000014</chNFe>
+      <cStat>100</cStat>
+      <xMotivo>Autorizado o uso da NF-e</xMotivo>
+    </infProt>
+  </protNFe>
 </nfeProc>
 ```
 
@@ -54,6 +64,7 @@ Por que ele passa:
 * O nome do arquivo tem a chave de 44 dígitos;
 * A chave indica competência `2610` (10/2026) e modelo `65`;
 * A chave do nome é igual ao `Id` do `<infNFe>` (sem o `NFe`);
+* O `<cStat>` do protocolo é `100` (nota autorizada pela SEFAZ);
 * A tag `<mod>` é `65`;
 * O `<dhEmi>` é de outubro de 2026;
 * O `<dest>` não tem CPF nem CNPJ.
@@ -71,6 +82,22 @@ Por que ele passa:
 | `...0018-com-cpf.xml`            | Tem CPF no destinatário                          | Descartada |
 | `...0015-com-cnpj.xml`           | Tem CNPJ no destinatário                         | Descartada |
 | `...0012-corrompido.xml`         | XML quebrado (`<nfeProc><NFe>`)                  | Ignorado sem travar |
+
+## Nota não autorizada (CT08)
+
+**Arquivo:** `35261012345678000195650010000000101000000013-cancelada.xml` (pasta [`cenario8-nota-nao-autorizada`](massa-de-dados/cenario8-nota-nao-autorizada))
+
+A nota está certa em tudo (chave, modelo 65, 10/2026, sem CPF/CNPJ), menos no protocolo: o `<cStat>` é `101` (cancelamento homologado). Por isso ela é descartada.
+
+```xml
+<protNFe>
+  <infProt>
+    <chNFe>35261012345678000195650010000000101000000013</chNFe>
+    <cStat>101</cStat>
+    <xMotivo>Cancelamento de NF-e homologado</xMotivo>
+  </infProt>
+</protNFe>
+```
 
 ---
 
@@ -90,6 +117,7 @@ Conteúdo gerado no CT02 e no CT03:
 [
   {
     "chave": "35261012345678000195650010000000011000000014",
+    "modelo": "65",
     "competencia": "10/2026"
   }
 ]
@@ -109,7 +137,7 @@ Quando não tem nenhuma nota válida (CT04), o CNPJ vira `00000` e a lista vem v
 
 **Status:** Aprovado
 
-Cliquei em BUSCAR sem a pasta `C:\XmlNfce` existir. O app mostrou o aviso e não fechou.
+Cliquei em **Buscar notas** sem a pasta `C:\XmlNfce` existir. O app mostrou o aviso e não fechou.
 
 ![CT01](evidencias/cenario1-pasta-inexistente.png)
 
@@ -155,6 +183,8 @@ Com a pasta vazia, o app gerou o `10202600000.txt` com a lista vazia.
 
 **Status:** Aprovado
 
+A ajuda mostra o passo a passo e todas as regras, inclusive o filtro de nota autorizada (`cStat` = 100) e os campos do JSON.
+
 ![CT05](evidencias/cenario5-ajuda.png)
 
 ---
@@ -174,6 +204,40 @@ Com a pasta vazia, o app gerou o `10202600000.txt` com a lista vazia.
 O app pede confirmação antes de fechar. Clicando em **Não**, ele continua aberto; em **Sim**, fecha.
 
 ![CT07](evidencias/cenario7-sair.png)
+
+---
+
+## CT08 — Nota não autorizada (cStat ≠ 100)
+
+**Status:** Aprovado
+
+Com 1 XML de nota cancelada (`cStat` 101) na pasta, o app encontrou 1 arquivo e não aprovou nenhuma nota. O arquivo `10202600000.txt` saiu com a lista vazia.
+
+![CT08 resumo](evidencias/cenario8-nota-nao-autorizada-resumo.png)
+
+![CT08 arquivo](evidencias/cenario8-nota-nao-autorizada-arquivo.png)
+
+---
+
+## CT09 — Tema claro / escuro
+
+**Status:** Aprovado
+
+O botão **Tema escuro** troca a tela para o fundo azul-noite, com o **Buscar notas** em laranja e a barra de título escura. O botão passa a se chamar **Tema claro**; clicando nele, a tela volta ao tema claro.
+
+![CT09](evidencias/cenario9-tema-escuro.png)
+
+---
+
+## CT10 — Tela cheia
+
+**Status:** Aprovado
+
+Ao maximizar a janela, a tela passa para duas colunas: logo, descrição e passo a passo à esquerda, formulário à direita. Ao voltar ao tamanho normal, a tela volta a ter uma coluna só.
+
+![CT10 claro](evidencias/cenario10-tela-cheia.png)
+
+![CT10 escuro](evidencias/cenario10-tela-cheia-escuro.png)
 
 ---
 
@@ -204,8 +268,10 @@ Ou no Visual Studio: **Teste → Gerenciador de Testes → Executar Todos**.
 | **TA11** | Destinatário com CNPJ é descartado                                       | Aprovado |
 | **TA12** | XML corrompido não interrompe o processamento                            | Aprovado |
 | **TA13** | Sem notas válidas, gera arquivo com `00000` e lista vazia                | Aprovado |
+| **TA14** | Nota com `cStat` diferente de 100 é descartada                           | Aprovado |
+| **TA15** | XML sem protocolo de autorização (sem `cStat`) é descartado              | Aprovado |
 
-**Resultado:** 13 de 13 aprovados.
+**Resultado:** 15 de 15 aprovados.
 
 ---
 
@@ -220,7 +286,10 @@ Ou no Visual Studio: **Teste → Gerenciador de Testes → Executar Todos**.
 | **CT05** | Botão Ajuda                      | Aprovado |
 | **CT06** | Botão Créditos                   | Aprovado |
 | **CT07** | Botão Sair                       | Aprovado |
-| **TA01–TA13** | Testes automatizados        | Aprovado |
+| **CT08** | Nota não autorizada (cStat ≠ 100) | Aprovado |
+| **CT09** | Tema claro / escuro              | Aprovado |
+| **CT10** | Tela cheia                       | Aprovado |
+| **TA01–TA15** | Testes automatizados        | Aprovado |
 
 ---
 
@@ -231,6 +300,8 @@ Todos os testes passaram. O JaguarV:
 * Avisa quando a pasta não existe;
 * Aprova só as NFC-e modelo 65 da competência escolhida e sem CPF/CNPJ;
 * Confere se a chave do nome do arquivo bate com a chave do XML;
+* Só aceita notas autorizadas pela SEFAZ (`cStat` = 100);
 * Descarta as notas inválidas e não trava com XML corrompido;
-* Gera o `.txt` com o nome e o conteúdo no formato certo, inclusive quando não tem nenhuma nota;
-* Tem os botões de ajuda, créditos e sair funcionando.
+* Gera o `.txt` com o nome e o conteúdo no formato certo (chave, modelo 65 e competência MM/AAAA), inclusive quando não tem nenhuma nota;
+* Tem os botões de ajuda, créditos e sair funcionando;
+* Troca entre tema claro e escuro e se adapta à tela cheia.

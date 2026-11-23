@@ -16,8 +16,19 @@ namespace JaguarV.Tests
             string chave,
             string modelo = "65",
             string dhEmi = "2026-09-15T10:00:00-03:00",
-            string dest = "")
+            string dest = "",
+            string? cStat = "100")
         {
+            // Protocolo de autorização da SEFAZ. cStat = null gera um XML sem <protNFe>.
+            string protocolo = cStat == null ? "" : $"""
+                  <protNFe>
+                    <infProt>
+                      <chNFe>{chave}</chNFe>
+                      <cStat>{cStat}</cStat>
+                    </infProt>
+                  </protNFe>
+                """;
+
             return $"""
                 <?xml version="1.0" encoding="utf-8"?>
                 <nfeProc xmlns="http://www.portalfiscal.inf.br/nfe">
@@ -36,6 +47,7 @@ namespace JaguarV.Tests
                       </total>
                     </infNFe>
                   </NFe>
+                {protocolo}
                 </nfeProc>
                 """;
         }
